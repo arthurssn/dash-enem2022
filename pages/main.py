@@ -1,13 +1,10 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import plotly.express as px
 
 st.title('ENEM 2022 no Maranhão')
 
 df = pd.read_csv('../../../../Downloads/microdados_enem_2022/DADOS/MICRODADOS_ENEM_2022.csv', sep=';', encoding="ISO-8859-1", chunksize=1000000)
-# st.line_chart
 
 df = pd.concat(df, ignore_index=True)
 
@@ -25,13 +22,32 @@ dfMA.head()
 dfMA = dfMA.dropna()  
 dfMA.info()
 
-cidades = dfMA['NO_MUNICIPIO_PROVA'].value_counts().head(5)
 cidades_ordenadas = dfMA.groupby('NO_MUNICIPIO_PROVA').size().sort_values(ascending=False).head(5)
 
-fig = px.bar(x=cidades_ordenadas.index, y=cidades_ordenadas, labels={'x': 'Cidades', 'y': 'Inscritos por cidade'},
-             title='Cidades com Mais Inscritos no Maranhão')
+fig_mais_inscritos = px.bar(x=cidades_ordenadas.index, y=cidades_ordenadas,
+                            labels={'x': 'Cidades', 'y': 'Inscritos por cidade'},
+                            title='5 Cidades com mais inscritos no Maranhão',
+                            color=cidades_ordenadas.values,  
+                            color_continuous_scale='blues',  
+                            )
 
 for i, v in enumerate(cidades_ordenadas):
-    fig.add_annotation(x=cidades_ordenadas.index[i], y=v + 0.1, text=str(v), showarrow=False, xanchor='center', yanchor='bottom')
+    fig_mais_inscritos.add_annotation(x=cidades_ordenadas.index[i], y=v + 0.1, text=str(v),
+        showarrow=False, xanchor='center', yanchor='bottom')
 
-st.plotly_chart(fig)
+st.plotly_chart(fig_mais_inscritos)
+
+cidadesM_ordenadas = dfMA.groupby('NO_MUNICIPIO_PROVA').size().sort_values().head(5)
+
+fig_menos_inscritos = px.bar(x=cidadesM_ordenadas.index, y=cidadesM_ordenadas,
+    labels={'x': 'Cidades', 'y': 'Inscritos por cidade'},
+    title='5 cidades com menos inscritos no Maranhão',
+    color=cidadesM_ordenadas.values,  
+    color_continuous_scale='reds',  
+    )
+
+for i, v in enumerate(cidadesM_ordenadas):
+    fig_menos_inscritos.add_annotation(x=cidadesM_ordenadas.index[i], y=v + 0.1, text=str(v),
+    showarrow=False, xanchor='center', yanchor='bottom')
+
+st.plotly_chart(fig_menos_inscritos)
