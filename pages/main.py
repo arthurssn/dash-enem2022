@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.title('ENEM 2022 no Maranhão')
+st.title('Maranhão no ENEM 2022')
 
 df = pd.read_csv('../../../../Downloads/microdados_enem_2022/DADOS/MICRODADOS_ENEM_2022.csv', sep=';', encoding="ISO-8859-1", chunksize=1000000)
 
@@ -51,3 +51,42 @@ for i, v in enumerate(cidadesM_ordenadas):
     showarrow=False, xanchor='center', yanchor='bottom')
 
 st.plotly_chart(fig_menos_inscritos)
+
+sexo_counts = dfMA['TP_SEXO'].value_counts()
+fig_sexo = px.pie(sexo_counts, labels=sexo_counts.index, values=sexo_counts.values,
+    title='Porcentagem por gênero de quem realizou a prova no Maranhão',
+    color=sexo_counts.index,
+    color_discrete_map={'M': 'blue', 'F': 'pink'},
+    )
+
+fig_sexo.update_traces(textinfo='label+percent', hoverinfo='label+percent')
+
+st.plotly_chart(fig_sexo)
+
+
+RACA = {
+    '0': 'Não Declarada',
+    '1': 'Branca',
+    '2': 'Preta',
+    '3': 'Parda',
+    '4': 'Amarela',
+    '5': 'Indígena'}
+
+TP_COR_RACA = dfMA['TP_COR_RACA'].astype(str).value_counts()
+
+contagem_por_cor_raca = {RACA[codigo]: contagem for codigo, contagem in TP_COR_RACA.items()}
+
+dados_grafico = pd.DataFrame(list(contagem_por_cor_raca.items()), columns=['Categoria', 'Contagem'])
+
+fig_raca = px.bar(dados_grafico, x='Contagem', y='Categoria', orientation='h',
+    title='Número de Inscritos por Cor e Raça no ENEM 2022 no Maranhão',
+    labels={'Contagem': 'Número de Inscritos', 'Categoria': 'Categoria'},
+    color='Contagem',  
+    color_continuous_scale='viridis',  
+    )
+
+fig_raca.update_layout(height=800, width=1000)
+
+fig_raca.update_layout(annotations=[dict(text=str(value), x=value, y=index, showarrow=False, xanchor='left', font=dict(size=10)) for index, value in enumerate(dados_grafico['Contagem'])])
+
+st.plotly_chart(fig_raca)
